@@ -71,9 +71,8 @@ public class Scanner {
     }
 
     private void consume(String expect) {
-        int index = 0;
-        while (index != expect.length()) {
-            if (!isFullyConsumed() && input.charAt(current) == expect.charAt(index++)) {
+        for (int i = 0; i < expect.length(); i++) {
+            if (!isFullyConsumed() && input.charAt(current) == expect.charAt(i)) {
                 advance();
             } else {
                 throw new RuntimeException("Malformed expression");
