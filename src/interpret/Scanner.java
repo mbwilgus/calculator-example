@@ -9,6 +9,8 @@ public class Scanner {
     private int current = 0;
     private int depth = 0;
 
+    private boolean negative = false;
+
     public Scanner(String input) {
         this.input = input;
     }
@@ -31,6 +33,12 @@ public class Scanner {
 
         if (isDigit(consuming)) {
             number();
+        } else if (consuming == '-') {
+            if (isDigit(peek(1))) {
+                negative = true;
+            } else {
+                throw new RuntimeException("Malformed expression");
+            }
         } else if (isValidAlpha(consuming)) {
             switch (consuming) {
                 case 'c':
@@ -46,7 +54,7 @@ public class Scanner {
             }
         } else {
             if (consuming != ')') {
-                throw new RuntimeException("Malformed expression.");
+                throw new RuntimeException("Malformed expression");
             }
             depth--;
         }
@@ -95,8 +103,10 @@ public class Scanner {
             while (isDigit(peek(1))) advance();
         }
 
-        addToken(TokenType.LITERAL,
-                Double.parseDouble(input.substring(start, current)));
+        String literal = (negative ? "-" : "") + input.substring(start, current);
+        negative = false;
+
+        addToken(TokenType.LITERAL, Double.parseDouble(literal));
     }
 
     private boolean isValidAlpha(char c) {
