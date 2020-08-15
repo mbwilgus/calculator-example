@@ -2,27 +2,26 @@ package function;
 
 import java.util.List;
 
-public class Cos implements Operator {
+public class Sin implements Operator {
     private Computable operand;
 
-    public Cos() {}
+    public Sin() {}
 
+    @Override
     public void bind(List<Computable> operands) {
         this.operand = operands.get(0);
     }
 
     @Override
     public double evaluate() {
-        int N = 1000;
+        int N = 999;
         double x = CustomMath.normalize(operand.evaluate());
-        double num = x*x;
-        double pN = 1 - num/((2*N-1)*(2*N));
+        double num = x * x;
+        double pN = 1 - num / ((2 * N) * (2 * N + 1));
         while (--N >= 1) {
-            pN = 1 - num/((2*N-1)*(2*N))*pN;
+            pN = 1 - num / ((2 * N) * (2 * N + 1)) * pN;
         }
 
-        return pN;
+        return x * pN;
     }
-
-
 }

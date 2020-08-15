@@ -1,8 +1,12 @@
 package interpret;
 
 public enum TokenType {
-    EXP,
-    COS,
-    EXPR,
-    LITERAL
+    // Single-character tokens
+    LEFT_PAREN, RIGHT_PAREN, CARET, MINUS, COMMA,
+
+    // Literals
+    OPERATOR,
+    NUMBER,
+
+    EOL
 }

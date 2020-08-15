@@ -1,10 +1,14 @@
 package function;
 
-public class Exp implements Computable {
+import java.util.List;
+
+public class Exp implements Operator {
     private Computable operand;
 
-    public Exp(Computable operand) {
-        this.operand = operand;
+    public Exp() {}
+
+    public void bind(List<Computable> operands) {
+        this.operand = operands.get(0);
     }
 
     @Override

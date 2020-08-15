@@ -1,13 +1,13 @@
 package interpret;
 
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Scanner {
-    private Stack<Token> tokens = new Stack<>();
-    private String input;
+    private final List<Token> tokens = new ArrayList<>();
+    private final String input;
     private int start = 0;
     private int current = 0;
-    private int depth = 0;
 
     private boolean negative = false;
 
@@ -15,69 +15,49 @@ public class Scanner {
         this.input = input;
     }
 
-    public Stack<Token> scan() {
+    public List<Token> tokenize() {
         while (!isFullyConsumed()) {
             start = current;
-            tokenize();
+            scan();
         }
 
-        if (depth != 0) {
-            throw new RuntimeException("Mismatched parentheses");
-        }
-
+        tokens.add(new Token(TokenType.EOL, "", null));
         return tokens;
     }
 
-    private void tokenize() {
+    private void scan() {
         char consuming = advance();
 
-        if (isDigit(consuming)) {
-            number();
-        } else if (consuming == '-') {
-            if (isDigit(peek(1))) {
-                negative = true;
-            } else {
-                throw new RuntimeException("Malformed expression");
-            }
-        } else if (isValidAlpha(consuming)) {
-            switch (consuming) {
-                case 'c':
-                    consume("os");
-                    addToken(TokenType.COS, null);
-                    consume("(");
-                    depth++;
-                    break;
-                case 'e':
-                    consume("^");
-                    addToken(TokenType.EXP, null);
-                    break;
-            }
-        } else {
-            if (consuming != ')') {
-                throw new RuntimeException("Malformed expression");
-            }
-            depth--;
+        switch(consuming) {
+            case '(': addToken(TokenType.LEFT_PAREN, null); break;
+            case ')': addToken(TokenType.RIGHT_PAREN, null); break;
+            case '^': addToken(TokenType.CARET, null); break;
+            case '-': addToken(TokenType.MINUS, null); break;
+            case ',': addToken(TokenType.COMMA, null); break;
+            case ' ':
+            case '\r':
+            case '\t':
+                break;
+            default:
+                if (consuming == '.' && isDigit(peek(1)) || isDigit(consuming)) {
+                    number();
+                } else if (isAlpha(consuming)) {
+                    operator();
+                } else {
+                    throw new RuntimeException("Malformed expression.");
+                }
         }
     }
 
     private void addToken(TokenType type, Double value) {
-        Token token = new Token(type, value);
-        tokens.push(token);
+        String lexeme = input.substring(start, current);
+        Token token = new Token(type, lexeme, value);
+        tokens.add(token);
     }
 
     private char advance() {
         current++;
         return input.charAt(current - 1);
-    }
-
-    private void consume(String expect) {
-        for (int i = 0; i < expect.length(); i++) {
-            if (!isFullyConsumed() && input.charAt(current) == expect.charAt(i)) {
-                advance();
-            } else {
-                throw new RuntimeException("Malformed expression");
-            }
-        }
     }
 
     private char peek(int lookahead) {
@@ -105,10 +85,29 @@ public class Scanner {
         String literal = (negative ? "-" : "") + input.substring(start, current);
         negative = false;
 
-        addToken(TokenType.LITERAL, Double.parseDouble(literal));
+        addToken(TokenType.NUMBER, Double.parseDouble(literal));
     }
 
-    private boolean isValidAlpha(char c) {
-        return c == 'c' || c == 'e';
+    private boolean isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') ||
+               (c >= 'A' && c <= 'Z');
+    }
+
+    private void operator() {
+        while (isAlpha(peek(1))) advance();
+
+        String lexeme = input.substring(start, current);
+        boolean notOperator = peek(1) != '^';
+        if (notOperator) {
+            if (lexeme.equals("pi")) {
+                addToken(TokenType.NUMBER, Math.PI);
+                return;
+            } else if (lexeme.equals("e")) {
+                addToken(TokenType.NUMBER, Math.E);
+                return;
+            }
+        }
+
+        addToken(TokenType.OPERATOR, null);
     }
 }

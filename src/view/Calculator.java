@@ -1,16 +1,14 @@
 package view;
 
 import function.Computable;
-import function.Cos;
-import function.Exp;
-import function.Literal;
+import interpret.Parser;
 import interpret.Scanner;
 import interpret.Token;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Stack;
+import java.util.List;
 
 public class Calculator {
     public static void main(String[] args) throws IOException {
@@ -31,49 +29,30 @@ public class Calculator {
 
     private static void run(String input) {
         Scanner scanner = new Scanner(input);
-        Stack<Token> tokens;
+        List<Token> tokens;
 
         try {
-            tokens = scanner.scan();
-        } catch(RuntimeException e) {
-            System.err.println(e.getMessage());
+            tokens = scanner.tokenize();
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
             return;
         }
 
-        double result;
-        if (tokens.size() == 0) {
-            return;
-        } else if (tokens.size() == 1) {
-            result = new Literal(tokens.pop().value).evaluate();
-        } else {
+        Parser parser = new Parser(tokens);
+        Computable expression;
 
-            Token operand = tokens.pop();
-            Token operator = tokens.pop();
-
-            Computable expr = buildExpr(operator,
-                    new Literal(operand.value));
-
-            while (!tokens.isEmpty()) {
-                operator = tokens.pop();
-                expr = buildExpr(operator, expr);
+        try {
+            expression = parser.parse();
+            Double result = expression.evaluate();
+            String text = result.toString();
+            if (text.equals("-0.0")) text = "0";
+            if (text.endsWith(".0")) {
+                text = text.substring(0, text.length() - 2);
             }
-
-            result = expr.evaluate();
+            System.out.println(text);
+        } catch (Parser.ParseError e) {
+            System.out.println("Cannot parse expression");
+            return;
         }
-
-        System.out.println(result);
-    }
-
-    private static Computable buildExpr(Token operator, Computable expr) {
-        switch(operator.type) {
-            case COS:
-                expr = new Cos(expr);
-                break;
-            case EXP:
-                expr = new Exp(expr);
-                break;
-        }
-
-        return expr;
     }
 }
