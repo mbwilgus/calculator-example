@@ -2,14 +2,10 @@ package function;
 
 import java.util.List;
 
-public class Cos implements Operator {
+public class Cos implements Computable {
     private Computable operand;
 
-    public Cos() {}
-
-    public void bind(List<Computable> operands) {
-        this.operand = operands.get(0);
-    }
+    public Cos(Computable operand) { this.operand = operand; }
 
     @Override
     public double evaluate() {

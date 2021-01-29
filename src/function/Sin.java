@@ -2,15 +2,10 @@ package function;
 
 import java.util.List;
 
-public class Sin implements Operator {
+public class Sin implements Computable {
     private Computable operand;
 
-    public Sin() {}
-
-    @Override
-    public void bind(List<Computable> operands) {
-        this.operand = operands.get(0);
-    }
+    public Sin(Computable operand) { this.operand = operand; }
 
     @Override
     public double evaluate() {

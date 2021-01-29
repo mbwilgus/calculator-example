@@ -2,14 +2,10 @@ package function;
 
 import java.util.List;
 
-public class Exp implements Operator {
+public class Exp implements Computable {
     private Computable operand;
 
-    public Exp() {}
-
-    public void bind(List<Computable> operands) {
-        this.operand = operands.get(0);
-    }
+    public Exp(Computable operand) { this.operand = operand; }
 
     @Override
     public double evaluate() {

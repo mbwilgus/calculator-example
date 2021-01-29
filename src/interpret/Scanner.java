@@ -33,6 +33,9 @@ public class Scanner {
             case ')': addToken(TokenType.RIGHT_PAREN, null); break;
             case '^': addToken(TokenType.CARET, null); break;
             case '-': addToken(TokenType.MINUS, null); break;
+            case '+': addToken(TokenType.PLUS, null); break;
+            case '*': addToken(TokenType.STAR, null); break;
+            case '/': addToken(TokenType.SLASH, null); break;
             case ',': addToken(TokenType.COMMA, null); break;
             case ' ':
             case '\r':

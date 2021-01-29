@@ -22,7 +22,45 @@ public class Parser {
 
         Computable expression = null;
         while (!isFullyConsumed()) {
-            expression = unary();
+            expression = addition();
+        }
+
+        return expression;
+    }
+
+    private Computable addition() {
+        Computable expression = multiplication();
+
+        while (match(TokenType.PLUS, TokenType.MINUS)) {
+            Token operator = previous();
+            Computable rhs = multiplication();
+            switch (operator.type) {
+                case PLUS:
+                    expression = new Add(expression, rhs);
+                    break;
+                case MINUS:
+                    expression = new Sub(expression, rhs);
+                    break;
+            }
+        }
+
+        return expression;
+    }
+
+    private Computable multiplication() {
+        Computable expression = unary();
+
+        while (match(TokenType.STAR, TokenType.SLASH)) {
+            Token operator = previous();
+            Computable rhs = unary();
+            switch (operator.type) {
+                case STAR:
+                    expression = new Mul(expression, rhs);
+                    break;
+                case SLASH:
+                    expression = new Div(expression, rhs);
+                    break;
+            }
         }
 
         return expression;
@@ -30,47 +68,29 @@ public class Parser {
 
     private Computable unary() {
         if (match(TokenType.MINUS)) {
-            List<Computable> arg = new ArrayList<>();
-            arg.add(unary());
-            Operator negation = new Negate();
-            negation.bind(arg);
+            Computable negation = new Negate(unary());
             return negation;
         }
 
-        return operator();
+        return primary();
     }
 
-    private Computable operator() {
-        Computable expression = primary();
-
-        while (true) {
-            if (match(TokenType.LEFT_PAREN, TokenType.CARET)) {
-                expression = getArguments((Operator)expression);
-            } else {
-                break;
-            }
-        }
-
-        return expression;
-    }
-
-    private Computable getArguments(Operator operator) {
+    private List<Computable> getArguments() {
         List<Computable> arguments = new ArrayList<>();
         Token open = previous();
         if (open.type == TokenType.LEFT_PAREN) {
             if (!check(TokenType.RIGHT_PAREN)) {
                 do {
-                    arguments.add(unary());
+                    arguments.add(addition());
                 } while (match(TokenType.COMMA));
             }
 
-            Token paren = consume(TokenType.RIGHT_PAREN);
+            /* Token paren = */ consume(TokenType.RIGHT_PAREN);
         } else {
             arguments.add(unary());
         }
 
-        operator.bind(arguments);
-        return operator;
+        return arguments;
     }
 
     private Computable primary() {
@@ -79,12 +99,16 @@ public class Parser {
         }
 
         if (match(TokenType.OPERATOR)) {
-            if (previous().lexeme.equals("e")) {
-                return new Exp();
-            } else if (previous().lexeme.equals("cos")) {
-                return new Cos();
-            } else if (previous().lexeme.equals("sin")) {
-                return new Sin();
+            Token operator = previous();
+            if (match(TokenType.LEFT_PAREN, TokenType.CARET)) {
+                List<Computable> arguments = getArguments();
+                if (operator.lexeme.equals("e")) {
+                    return new Exp(arguments.get(0));
+                } else if (operator.lexeme.equals("cos")) {
+                    return new Cos(arguments.get(0));
+                } else if (operator.lexeme.equals("sin")) {
+                    return new Sin(arguments.get(0));
+                }
             }
         }
 
