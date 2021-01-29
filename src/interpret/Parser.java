@@ -102,14 +102,21 @@ public class Parser {
             Token operator = previous();
             if (match(TokenType.LEFT_PAREN, TokenType.CARET)) {
                 List<Computable> arguments = getArguments();
-                if (operator.lexeme.equals("e")) {
-                    return new Exp(arguments.get(0));
-                } else if (operator.lexeme.equals("cos")) {
-                    return new Cos(arguments.get(0));
-                } else if (operator.lexeme.equals("sin")) {
-                    return new Sin(arguments.get(0));
+                switch (operator.lexeme) {
+                    case "e":
+                        return new Exp(arguments.get(0));
+                    case "cos":
+                        return new Cos(arguments.get(0));
+                    case "sin":
+                        return new Sin(arguments.get(0));
                 }
             }
+        }
+
+        if (match(TokenType.LEFT_PAREN)) {
+            Computable expr = addition();
+            consume(TokenType.RIGHT_PAREN);
+            return new SubExpression(expr);
         }
 
         throw new ParseError();

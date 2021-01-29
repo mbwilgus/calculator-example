@@ -1,9 +1,7 @@
 package function;
 
-import java.util.List;
-
 public class Cos implements Computable {
-    private Computable operand;
+    private final Computable operand;
 
     public Cos(Computable operand) { this.operand = operand; }
 

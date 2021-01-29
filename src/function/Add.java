@@ -1,8 +1,8 @@
 package function;
 
 public class Add implements Computable {
-    private Computable lhs;
-    private Computable rhs;
+    private final Computable lhs;
+    private final Computable rhs;
 
     public Add(Computable lhs, Computable rhs) { this.lhs = lhs; this.rhs = rhs; }
 

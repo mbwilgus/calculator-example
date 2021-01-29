@@ -43,8 +43,8 @@ public class Calculator {
 
         try {
             expression = parser.parse();
-            Double result = expression.evaluate();
-            String text = result.toString();
+            double result = expression.evaluate();
+            String text = Double.toString(result);
             if (text.equals("-0.0")) text = "0";
             if (text.endsWith(".0")) {
                 text = text.substring(0, text.length() - 2);

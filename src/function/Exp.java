@@ -1,9 +1,7 @@
 package function;
 
-import java.util.List;
-
 public class Exp implements Computable {
-    private Computable operand;
+    private final Computable operand;
 
     public Exp(Computable operand) { this.operand = operand; }
 

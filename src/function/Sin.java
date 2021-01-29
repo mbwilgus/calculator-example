@@ -1,9 +1,7 @@
 package function;
 
-import java.util.List;
-
 public class Sin implements Computable {
-    private Computable operand;
+    private final Computable operand;
 
     public Sin(Computable operand) { this.operand = operand; }
 
