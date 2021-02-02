@@ -48,11 +48,11 @@ public class Parser {
     }
 
     private Computable multiplication() {
-        Computable expression = unary();
+        Computable expression = exponentiation();
 
         while (match(TokenType.STAR, TokenType.SLASH)) {
             Token operator = previous();
-            Computable rhs = unary();
+            Computable rhs = exponentiation();
             switch (operator.type) {
                 case STAR:
                     expression = new Mul(expression, rhs);
@@ -61,6 +61,17 @@ public class Parser {
                     expression = new Div(expression, rhs);
                     break;
             }
+        }
+
+        return expression;
+    }
+
+    private Computable exponentiation() {
+        Computable expression = unary();
+
+        while (match(TokenType.CARET)) {
+            Computable power = exponentiation(); // exponentiation is right associative
+            expression = new Pow(expression, power);
         }
 
         return expression;
@@ -75,48 +86,48 @@ public class Parser {
         return primary();
     }
 
-    private List<Computable> getArguments() {
+    private Computable getArguments(Token operator) {
         List<Computable> arguments = new ArrayList<>();
-        Token open = previous();
-        if (open.type == TokenType.LEFT_PAREN) {
-            if (!check(TokenType.RIGHT_PAREN)) {
-                do {
-                    arguments.add(addition());
-                } while (match(TokenType.COMMA));
-            }
 
-            /* Token paren = */ consume(TokenType.RIGHT_PAREN);
-        } else {
-            arguments.add(unary());
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                arguments.add(addition());
+            } while (match(TokenType.COMMA));
         }
 
-        return arguments;
+        /* Token paren = */ consume(TokenType.RIGHT_PAREN);
+
+        switch (operator.lexeme) {
+            case "exp":
+                return new Exp(arguments.get(0));
+            case "cos":
+                return new Cos(arguments.get(0));
+            case "sin":
+                return new Sin(arguments.get(0));
+            case "log":
+                return new Log(arguments.get(0));
+            default:
+                throw new ParseError();
+        }
     }
 
     private Computable primary() {
         if (match(TokenType.NUMBER)) {
-            return new Literal(previous().value);
+            Token number = previous();
+            return new Literal(number.value, number.lexeme);
         }
 
         if (match(TokenType.OPERATOR)) {
             Token operator = previous();
-            if (match(TokenType.LEFT_PAREN, TokenType.CARET)) {
-                List<Computable> arguments = getArguments();
-                switch (operator.lexeme) {
-                    case "e":
-                        return new Exp(arguments.get(0));
-                    case "cos":
-                        return new Cos(arguments.get(0));
-                    case "sin":
-                        return new Sin(arguments.get(0));
-                }
+            if (match(TokenType.LEFT_PAREN)) {
+                return getArguments(operator);
             }
         }
 
         if (match(TokenType.LEFT_PAREN)) {
-            Computable expr = addition();
+            Computable subexpression = addition();
             consume(TokenType.RIGHT_PAREN);
-            return new SubExpression(expr);
+            return new SubExpression(subexpression);
         }
 
         throw new ParseError();

@@ -100,15 +100,12 @@ public class Scanner {
         while (isAlpha(peek(1))) advance();
 
         String lexeme = input.substring(start, current);
-        boolean notOperator = peek(1) != '^';
-        if (notOperator) {
-            if (lexeme.equals("pi")) {
-                addToken(TokenType.NUMBER, Math.PI);
-                return;
-            } else if (lexeme.equals("e")) {
-                addToken(TokenType.NUMBER, Math.E);
-                return;
-            }
+        if (lexeme.equals("pi")) {
+            addToken(TokenType.NUMBER, Math.PI);
+            return;
+        } else if (lexeme.equals("e")) {
+            addToken(TokenType.NUMBER, Math.E);
+            return;
         }
 
         addToken(TokenType.OPERATOR, null);
