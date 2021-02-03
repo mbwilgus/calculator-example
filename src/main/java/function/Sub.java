@@ -13,14 +13,14 @@ public class Sub implements Computable {
     public Sub(Computable lhs, Computable rhs) { this.lhs = lhs; this.rhs = rhs; }
 
     @Override
-    public Either<String, Double> evaluate() {
-        Either<String, Double> x = lhs.evaluate();
+    public Either<String, Double> evaluate(Formula formula) {
+        Either<String, Double> x = lhs.evaluate(formula);
 
         if (x.isLeft()) {
             return x;
         }
 
-        Either<String, Double> y = rhs.evaluate();
+        Either<String, Double> y = rhs.evaluate(formula);
 
         Function<Double, Either<String, Double>> f = (Double b) -> {
             Function<Double, Double> sub = (Double a) -> a - b;

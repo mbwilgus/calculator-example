@@ -14,7 +14,7 @@ public class Literal implements Computable {
     }
 
     @Override
-    public Either<String, Double> evaluate() {
+    public Either<String, Double> evaluate(Formula formula) {
         String error = Computable.CalculationError(value);
 
         if (error != null) {

@@ -1,6 +1,9 @@
 package view;
 
 import function.Computable;
+import function.CustomMath;
+import function.Formula;
+import function.JavaMath;
 import interpret.Parser;
 import interpret.Scanner;
 import interpret.Token;
@@ -43,15 +46,22 @@ public class Calculator {
 
         try {
             expression = parser.parse();
-            String text = expression.evaluate().read();
-            if (text.equals("-0.0")) text = "0";
-            if (text.endsWith(".0")) {
-                text = text.substring(0, text.length() - 2);
-            }
+            Formula formula = new JavaMath();
+            String text = expression.evaluate(formula).fmap((Double d) -> {
+                String result = d.toString();
+                if (result.equals("-0.0")) result = "0";
+                if (result.endsWith(".0")) {
+                    result = result.substring(0, result.length() - 2);
+                }
+                return result;
+            }).read();
+
             System.out.println(text);
         } catch (Parser.ParseError e) {
             System.out.println("Cannot parse expression");
             return;
+        } catch (Formula.UnimplementedException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

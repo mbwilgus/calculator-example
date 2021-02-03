@@ -12,8 +12,8 @@ public class Negate implements Computable {
     public Negate(Computable operand) { this.operand = operand; }
 
     @Override
-    public Either<String, Double> evaluate() {
-        Either<String, Double> op = operand.evaluate();
+    public Either<String, Double> evaluate(Formula formula) {
+        Either<String, Double> op = operand.evaluate(formula);
 
         Function<Double, Either<String, Double>> f = (Double x) -> {
             double out = -x;

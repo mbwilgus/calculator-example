@@ -13,17 +13,17 @@ public class Pow implements Computable {
     public Pow(Computable base, Computable power) { this.base = base; this.exp = power; }
 
     @Override
-    public Either<String, Double> evaluate() {
-        Either<String, Double> x = base.evaluate();
+    public Either<String, Double> evaluate(Formula formula) {
+        Either<String, Double> x = base.evaluate(formula);
 
         if (x.isLeft()) {
             return x;
         }
 
-        Either<String, Double> y = exp.evaluate();
+        Either<String, Double> y = exp.evaluate(formula);
 
         Function<Double, Either<String, Double>> f = (Double b) -> {
-            Function<Double, Double> pow = (Double a) -> Math.pow(a, b);
+            Function<Double, Double> pow = (Double a) -> Computable.closeTo(formula.pow(a, b), 1E-10);
 
             // x is definitely Right
             Right<String, Double> power = x.fmap(pow).projectRight();

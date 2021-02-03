@@ -12,17 +12,11 @@ public class Cos implements Computable {
     public Cos(Computable operand) { this.operand = operand; }
 
     @Override
-    public Either<String, Double> evaluate() {
-        Either<String, Double> op = operand.evaluate();
+    public Either<String, Double> evaluate(Formula formula) {
+        Either<String, Double> op = operand.evaluate(formula);
 
-        Function<Double, Either<String, Double>> f = (Double d) -> {
-            int N = 1000;
-            double x = CustomMath.normalize(d);
-            x = x*x;
-            double p = 1 - x/((2*N-1)*(2*N));
-            while (--N >= 1) {
-                p = 1 - x/((2*N-1)*(2*N))*p;
-            }
+        Function<Double, Either<String, Double>> f = (Double x) -> {
+            double p = Computable.closeTo(formula.cos(x), 1E-10);
 
             String error = Computable.CalculationError(p);
             if (error != null) {

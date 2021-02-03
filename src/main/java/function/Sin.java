@@ -12,19 +12,11 @@ public class Sin implements Computable {
     public Sin(Computable operand) { this.operand = operand; }
 
     @Override
-    public Either<String, Double> evaluate() {
-        Either<String, Double> op = operand.evaluate();
+    public Either<String, Double> evaluate(Formula formula) {
+        Either<String, Double> op = operand.evaluate(formula);
 
-        Function<Double, Either<String, Double>> f = (Double d) -> {
-            int N = 999;
-            double ang = CustomMath.normalize(d);
-            double x = ang * ang;
-            double p = 1 - x / ((2 * N) * (2 * N + 1));
-            while (--N >= 1) {
-                p = 1 - x / ((2 * N) * (2 * N + 1)) * p;
-            }
-
-            p = ang * p;
+        Function<Double, Either<String, Double>> f = (Double x) -> {
+            double p = Computable.closeTo(formula.sin(x), 1E-10);
 
             String error = Computable.CalculationError(p);
             if (error != null) {
