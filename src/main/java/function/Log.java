@@ -12,18 +12,18 @@ public class Log implements Computable {
     public Log(Computable operand) { this.operand = operand; }
 
     @Override
-    public Either<String, Double> evaluate() {
-        Either<String, Double> op = operand.evaluate();
+    public Either<String, Double> evaluate(Formula formula) {
+        Either<String, Double> op = operand.evaluate(formula);
 
         Function<Double, Either<String, Double>> f = (Double x) -> {
-            double out = Math.log(x);
+            double p = Computable.closeTo(formula.log(x), 1E-10);
 
-            String error = Computable.CalculationError(out);
+            String error = Computable.CalculationError(p);
             if (error != null) {
                 return new Left<>(error + " @ " + reconstruct());
             }
 
-            return new Right<>(out);
+            return new Right<>(p);
         };
 
         return op.bind(f);

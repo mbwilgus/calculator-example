@@ -12,16 +12,11 @@ public class Exp implements Computable {
     public Exp(Computable operand) { this.operand = operand; }
 
     @Override
-    public Either<String, Double> evaluate() {
-        Either<String, Double> op = operand.evaluate();
+    public Either<String, Double> evaluate(Formula formula) {
+        Either<String, Double> op = operand.evaluate(formula);
 
         Function<Double, Either<String, Double>> f = (Double x) -> {
-            int N = 1000;
-            double p = 1 + x/N;
-
-            while (--N >= 1) {
-                p = 1 + x/N*p;
-            }
+            double p = Computable.closeTo(formula.exp(x), 1E-10);
 
             String error = Computable.CalculationError(p);
             if (error != null) {

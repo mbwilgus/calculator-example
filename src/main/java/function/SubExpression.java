@@ -8,8 +8,8 @@ public class SubExpression implements Computable{
     public SubExpression(Computable expr) { this.expr = expr; }
 
     @Override
-    public Either<String, Double> evaluate() {
-        return expr.evaluate();
+    public Either<String, Double> evaluate(Formula formula) {
+        return expr.evaluate(formula);
     }
 
     @Override
