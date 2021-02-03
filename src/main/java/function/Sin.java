@@ -17,16 +17,16 @@ public class Sin implements Computable {
 
         Function<Double, Either<String, Double>> f = (Double d) -> {
             int N = 999;
-            double x = CustomMath.normalize(d);
-            x = x * x;
+            double ang = CustomMath.normalize(d);
+            double x = ang * ang;
             double p = 1 - x / ((2 * N) * (2 * N + 1));
             while (--N >= 1) {
                 p = 1 - x / ((2 * N) * (2 * N + 1)) * p;
             }
 
-            p = x * p;
+            p = ang * p;
 
-            String error = CalculationError(p);
+            String error = Computable.CalculationError(p);
             if (error != null) {
                 return new Left<>(error + " @ " + reconstruct());
             }

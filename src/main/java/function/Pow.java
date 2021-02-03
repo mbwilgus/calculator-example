@@ -8,36 +8,39 @@ import java.util.function.Function;
 
 public class Pow implements Computable {
     private final Computable base;
-    private final Computable power;
+    private final Computable exp;
 
-    public Pow(Computable base, Computable power) { this.base = base; this.power = power; }
+    public Pow(Computable base, Computable power) { this.base = base; this.exp = power; }
 
     @Override
     public Either<String, Double> evaluate() {
-        Either<String, Double> l = base.evaluate();
+        Either<String, Double> x = base.evaluate();
 
-        if (l.isLeft()) {
-            return l;
+        if (x.isLeft()) {
+            return x;
         }
 
-        Either<String, Double> r = power.evaluate();
+        Either<String, Double> y = exp.evaluate();
 
-        Function<Double, Either<String, Double>> f = (Double d) -> {
-            double out = Math.pow(((Right<String, Double>) l).get(), d);
+        Function<Double, Either<String, Double>> f = (Double b) -> {
+            Function<Double, Double> pow = (Double a) -> Math.pow(a, b);
 
-            String error = CalculationError(out);
+            // x is definitely Right
+            Right<String, Double> power = x.fmap(pow).projectRight();
+
+            String error = Computable.CalculationError(power.get());
             if (error != null) {
                 return new Left<>(error + " @ " + reconstruct());
             }
 
-            return new Right<>(out);
+            return power;
         };
 
-        return r.bind(f);
+        return y.bind(f);
     }
 
     @Override
     public String reconstruct() {
-        return base.reconstruct() + "^" + power.reconstruct();
+        return base.reconstruct() + "^" + exp.reconstruct();
     }
 }

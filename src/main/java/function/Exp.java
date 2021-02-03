@@ -23,7 +23,7 @@ public class Exp implements Computable {
                 p = 1 + x/N*p;
             }
 
-            String error = CalculationError(p);
+            String error = Computable.CalculationError(p);
             if (error != null) {
                 return new Left<>(error + " @ " + reconstruct());
             }

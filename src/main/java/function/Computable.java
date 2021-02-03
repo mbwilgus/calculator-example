@@ -6,7 +6,7 @@ public interface Computable {
     Either<String, Double> evaluate();
     String reconstruct();
 
-    default String CalculationError(double d) {
+    static String CalculationError(double d) {
         if (Double.isInfinite(d)) {
             return "overflow";
         }

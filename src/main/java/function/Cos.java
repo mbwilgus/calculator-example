@@ -24,7 +24,7 @@ public class Cos implements Computable {
                 p = 1 - x/((2*N-1)*(2*N))*p;
             }
 
-            String error = CalculationError(p);
+            String error = Computable.CalculationError(p);
             if (error != null) {
                 return new Left<>(error + " @ " + reconstruct());
             }

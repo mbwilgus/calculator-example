@@ -17,30 +17,33 @@ public class Div implements Computable {
 
     @Override
     public Either<String, Double> evaluate() {
-        Either<String, Double> l = lhs.evaluate();
+        Either<String, Double> x = lhs.evaluate();
 
-        if (l.isLeft()) {
-            return l;
+        if (x.isLeft()) {
+            return x;
         }
 
-        Either<String, Double> r = rhs.evaluate();
+        Either<String, Double> y = rhs.evaluate();
 
-        Function<Double, Either<String, Double>> f = (Double d) -> {
-            if (d == 0) {
+        Function<Double, Either<String, Double>> f = (Double b) -> {
+            if (b == 0) {
                 return new Left<>("division by zero @ " + rhs.reconstruct());
             }
 
-            double out = ((Right<String, Double>) l).get() / d;
+            Function<Double, Double> div = (Double a) -> a / b;
 
-            String error = CalculationError(out);
+            // x is definitely Right
+            Right<String, Double> quotient = x.fmap(div).projectRight();
+
+            String error = Computable.CalculationError(quotient.get());
             if (error != null) {
                 return new Left<>(error + " @ " + reconstruct());
             }
 
-            return new Right<>(out);
+            return quotient;
         };
 
-        return r.bind(f);
+        return y.bind(f);
     }
 
     @Override

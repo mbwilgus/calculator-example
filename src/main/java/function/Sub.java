@@ -14,26 +14,29 @@ public class Sub implements Computable {
 
     @Override
     public Either<String, Double> evaluate() {
-        Either<String, Double> l = lhs.evaluate();
+        Either<String, Double> x = lhs.evaluate();
 
-        if (l.isLeft()) {
-            return l;
+        if (x.isLeft()) {
+            return x;
         }
 
-        Either<String, Double> r = rhs.evaluate();
+        Either<String, Double> y = rhs.evaluate();
 
-        Function<Double, Either<String, Double>> f = (Double d) -> {
-            double out = ((Right<String, Double>) l).get() - d;
+        Function<Double, Either<String, Double>> f = (Double b) -> {
+            Function<Double, Double> sub = (Double a) -> a - b;
 
-            String error = CalculationError(out);
+            // x is definitely Right
+            Right<String, Double> difference = x.fmap(sub).projectRight();
+
+            String error = Computable.CalculationError(difference.get());
             if (error != null) {
                 return new Left<>(error + " @ " + reconstruct());
             }
 
-            return new Right<>(out);
+            return difference;
         };
 
-        return r.bind(f);
+        return y.bind(f);
     }
 
     @Override

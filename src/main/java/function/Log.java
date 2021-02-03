@@ -18,7 +18,7 @@ public class Log implements Computable {
         Function<Double, Either<String, Double>> f = (Double x) -> {
             double out = Math.log(x);
 
-            String error = CalculationError(out);
+            String error = Computable.CalculationError(out);
             if (error != null) {
                 return new Left<>(error + " @ " + reconstruct());
             }

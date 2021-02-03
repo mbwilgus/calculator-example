@@ -15,7 +15,7 @@ public class Literal implements Computable {
 
     @Override
     public Either<String, Double> evaluate() {
-        String error = CalculationError(value);
+        String error = Computable.CalculationError(value);
 
         if (error != null) {
             return new Left<>(error + "@" + reconstruct());
