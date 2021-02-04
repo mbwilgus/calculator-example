@@ -1,8 +1,6 @@
 package function;
 
 import type.Either;
-import type.Left;
-import type.Right;
 
 import java.util.function.Function;
 
@@ -14,29 +12,17 @@ public class Mul implements Computable {
 
     @Override
     public Either<String, Double> evaluate(Formula formula) {
-        Either<String, Double> x = lhs.evaluate(formula);
+        Function<Double, Either<String, Double>> eval = (Double x) -> {
+            Function<Double, Double> mul = (Double y) ->
+                    Computable.roundIf(x * y, 1E-10);
 
-        if (x.isLeft()) {
-            return x;
-        }
-
-        Either<String, Double> y = rhs.evaluate(formula);
-
-        Function<Double, Either<String, Double>> f = (Double b) -> {
-            Function<Double, Double> mul = (Double a) -> a * b;
-
-            // x is definitely Right
-            Right<String, Double> product = x.fmap(mul).projectRight();
-
-            String error = Computable.CalculationError(product.get());
-            if (error != null) {
-                return new Left<>(error + " @ " + reconstruct());
-            }
-
-            return product;
+            return rhs.evaluate(formula).fmap(mul);
         };
 
-        return y.bind(f);
+        Function<Double, Either<String, Double>> err = (Double x) ->
+                Computable.checkError(x, this);
+
+        return lhs.evaluate(formula).bind(eval).bind(err);
     }
 
     @Override

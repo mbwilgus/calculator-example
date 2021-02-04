@@ -1,8 +1,6 @@
 package function;
 
 import type.Either;
-import type.Left;
-import type.Right;
 
 import java.util.function.Function;
 
@@ -13,20 +11,13 @@ public class Log implements Computable {
 
     @Override
     public Either<String, Double> evaluate(Formula formula) {
-        Either<String, Double> op = operand.evaluate(formula);
+        Function<Double, Double> log = (Double x) ->
+                Computable.roundIf(formula.log(x), 1E-10);
 
-        Function<Double, Either<String, Double>> f = (Double x) -> {
-            double p = Computable.closeTo(formula.log(x), 1E-10);
+        Function<Double, Either<String, Double>> err = (Double x) ->
+                Computable.checkError(x, this);
 
-            String error = Computable.CalculationError(p);
-            if (error != null) {
-                return new Left<>(error + " @ " + reconstruct());
-            }
-
-            return new Right<>(p);
-        };
-
-        return op.bind(f);
+        return operand.evaluate(formula).fmap(log).bind(err);
     }
 
     @Override

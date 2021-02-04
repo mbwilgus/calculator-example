@@ -1,8 +1,6 @@
 package function;
 
 import type.Either;
-import type.Left;
-import type.Right;
 
 public class Literal implements Computable {
     private final double value;
@@ -15,13 +13,7 @@ public class Literal implements Computable {
 
     @Override
     public Either<String, Double> evaluate(Formula formula) {
-        String error = Computable.CalculationError(value);
-
-        if (error != null) {
-            return new Left<>(error + "@" + reconstruct());
-        }
-
-        return new Right<>(value);
+        return Computable.checkError(value, this);
     }
 
     @Override

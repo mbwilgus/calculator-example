@@ -1,12 +1,14 @@
 package function;
 
 import type.Either;
+import type.Left;
+import type.Right;
 
 public interface Computable {
     Either<String, Double> evaluate(Formula formula);
     String reconstruct();
 
-    static double closeTo(double x, double e) {
+    static double roundIf(double x, double e) {
         if (Math.abs(Math.round(x) - x) <= e ) {
             return Math.round(x);
         }
@@ -14,15 +16,15 @@ public interface Computable {
         return x;
     }
 
-    static String CalculationError(double d) {
+    static Either<String, Double> checkError(double d, Computable expression) {
         if (Double.isInfinite(d)) {
-            return "overflow";
+            return new Left<>( "overflow @ " + expression.reconstruct());
         }
 
         if (Double.isNaN(d)) {
-            return "undefined";
+            return  new Left<>("undefined @ " + expression.reconstruct());
         }
 
-        return null;
+        return new Right<>(d);
     }
 }

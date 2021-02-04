@@ -2,7 +2,6 @@ package function;
 
 import type.Either;
 import type.Left;
-import type.Right;
 
 import java.util.function.Function;
 
@@ -17,33 +16,22 @@ public class Div implements Computable {
 
     @Override
     public Either<String, Double> evaluate(Formula formula) {
-        Either<String, Double> x = lhs.evaluate(formula);
+        Function <Double, Either<String, Double>> eval = (Double x) -> {
+            Function<Double, Either<String, Double>> div = (Double y) -> {
+                if (y == 0) {
+                    return new Left<>("division by zero @ " + rhs.reconstruct());
+                }
 
-        if (x.isLeft()) {
-            return x;
-        }
+                return Either.unit(Computable.roundIf(x / y, 1E-10));
+            };
 
-        Either<String, Double> y = rhs.evaluate(formula);
-
-        Function<Double, Either<String, Double>> f = (Double b) -> {
-            if (b == 0) {
-                return new Left<>("division by zero @ " + rhs.reconstruct());
-            }
-
-            Function<Double, Double> div = (Double a) -> a / b;
-
-            // x is definitely Right
-            Right<String, Double> quotient = x.fmap(div).projectRight();
-
-            String error = Computable.CalculationError(quotient.get());
-            if (error != null) {
-                return new Left<>(error + " @ " + reconstruct());
-            }
-
-            return quotient;
+            return rhs.evaluate(formula).bind(div);
         };
 
-        return y.bind(f);
+        Function<Double, Either<String, Double>> err = (Double x) ->
+                Computable.checkError(x, this);
+
+        return lhs.evaluate(formula).bind(eval).bind(err);
     }
 
     @Override

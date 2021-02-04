@@ -1,32 +1,25 @@
 package function;
 
 import type.Either;
-import type.Left;
-import type.Right;
 
 import java.util.function.Function;
 
 public class Cos implements Computable {
     private final Computable operand;
 
-    public Cos(Computable operand) { this.operand = operand; }
+    public Cos(Computable operand) {
+        this.operand = operand;
+    }
 
     @Override
     public Either<String, Double> evaluate(Formula formula) {
-        Either<String, Double> op = operand.evaluate(formula);
+        Function<Double, Double> cos = (Double x) ->
+                Computable.roundIf(formula.cos(x), 1E-10);
 
-        Function<Double, Either<String, Double>> f = (Double x) -> {
-            double p = Computable.closeTo(formula.cos(x), 1E-10);
+        Function<Double, Either<String, Double>> err = (Double x) ->
+                Computable.checkError(x, this);
 
-            String error = Computable.CalculationError(p);
-            if (error != null) {
-                return new Left<>(error + " @ " + reconstruct());
-            }
-
-            return new Right<>(p);
-        };
-
-        return op.bind(f);
+        return operand.evaluate(formula).fmap(cos).bind(err);
     }
 
     @Override

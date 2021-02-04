@@ -1,8 +1,6 @@
 package function;
 
 import type.Either;
-import type.Left;
-import type.Right;
 
 import java.util.function.Function;
 
@@ -14,29 +12,17 @@ public class Sub implements Computable {
 
     @Override
     public Either<String, Double> evaluate(Formula formula) {
-        Either<String, Double> x = lhs.evaluate(formula);
+        Function<Double, Either<String, Double>> eval = (Double x) -> {
+            Function<Double, Double> sub = (Double y) ->
+                    Computable.roundIf(x - y, 1E-10);
 
-        if (x.isLeft()) {
-            return x;
-        }
-
-        Either<String, Double> y = rhs.evaluate(formula);
-
-        Function<Double, Either<String, Double>> f = (Double b) -> {
-            Function<Double, Double> sub = (Double a) -> a - b;
-
-            // x is definitely Right
-            Right<String, Double> difference = x.fmap(sub).projectRight();
-
-            String error = Computable.CalculationError(difference.get());
-            if (error != null) {
-                return new Left<>(error + " @ " + reconstruct());
-            }
-
-            return difference;
+            return rhs.evaluate(formula).fmap(sub);
         };
 
-        return y.bind(f);
+        Function<Double, Either<String, Double>> err = (Double x) ->
+                Computable.checkError(x, this);
+
+        return lhs.evaluate(formula).bind(eval).bind(err);
     }
 
     @Override
