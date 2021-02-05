@@ -16,4 +16,5 @@ public interface Formula {
     double log(double x) throws UnimplementedException;
     double pow(double x, double y) throws UnimplementedException;
     double sin(double x) throws UnimplementedException;
+    double tan(double x) throws UnimplementedException;
 }

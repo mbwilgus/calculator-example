@@ -1,7 +1,9 @@
 package interpret;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Scanner {
     private final List<Token> tokens = new ArrayList<>();
@@ -9,7 +11,13 @@ public class Scanner {
     private int start = 0;
     private int current = 0;
 
-    private boolean negative = false;
+    private static final Map<String, Double> constants;
+
+    static {
+        constants = new HashMap<>();
+        constants.put("pi", Math.PI);
+        constants.put("e", Math.E);
+    }
 
     public Scanner(String input) {
         this.input = input;
@@ -52,8 +60,12 @@ public class Scanner {
         }
     }
 
+    private String selection() {
+        return input.substring(start, current);
+    }
+
     private void addToken(TokenType type, Double value) {
-        String lexeme = input.substring(start, current);
+        String lexeme = selection();
         Token token = new Token(type, lexeme, value);
         tokens.add(token);
     }
@@ -85,10 +97,7 @@ public class Scanner {
             while (isDigit(peek(1))) advance();
         }
 
-        String literal = (negative ? "-" : "") + input.substring(start, current);
-        negative = false;
-
-        addToken(TokenType.NUMBER, Double.parseDouble(literal));
+        addToken(TokenType.NUMBER, Double.parseDouble(selection()));
     }
 
     private boolean isAlpha(char c) {
@@ -99,15 +108,8 @@ public class Scanner {
     private void operator() {
         while (isAlpha(peek(1))) advance();
 
-        String lexeme = input.substring(start, current);
-        if (lexeme.equals("pi")) {
-            addToken(TokenType.NUMBER, Math.PI);
-            return;
-        } else if (lexeme.equals("e")) {
-            addToken(TokenType.NUMBER, Math.E);
-            return;
-        }
-
-        addToken(TokenType.OPERATOR, null);
+        Double constant = constants.get(selection());
+        if (constant != null) addToken(TokenType.NUMBER, constant);
+        else addToken(TokenType.OPERATOR, null);
     }
 }

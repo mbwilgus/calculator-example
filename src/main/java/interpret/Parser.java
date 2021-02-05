@@ -3,13 +3,28 @@ package interpret;
 import function.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Parser {
     public static class ParseError extends RuntimeException {}
 
     private final List<Token> tokens;
     private int current = 0;
+
+    private boolean disallowPrimary = false;
+
+    private static final Map<String, OperatorInitializer> operators;
+
+    static {
+        operators = new HashMap<>();
+        operators.put("cos", new OperatorInitializer.CosInitializer());
+        operators.put("exp", new OperatorInitializer.ExpInitializer());
+        operators.put("log", new OperatorInitializer.LogInitializer());
+        operators.put("sin", new OperatorInitializer.SinInitializer());
+        operators.put("tan", new OperatorInitializer.TanInitializer());
+    }
 
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
@@ -32,6 +47,7 @@ public class Parser {
         Computable expression = multiplication();
 
         while (match(TokenType.PLUS, TokenType.MINUS)) {
+            disallowPrimary = false;
             Token operator = previous();
             Computable rhs = multiplication();
             switch (operator.type) {
@@ -51,6 +67,7 @@ public class Parser {
         Computable expression = exponentiation();
 
         while (match(TokenType.STAR, TokenType.SLASH)) {
+            disallowPrimary = false;
             Token operator = previous();
             Computable rhs = exponentiation();
             switch (operator.type) {
@@ -70,6 +87,7 @@ public class Parser {
         Computable expression = unary();
 
         while (match(TokenType.CARET)) {
+            disallowPrimary = false;
             Computable power = exponentiation(); // exponentiation is right associative
             expression = new Pow(expression, power);
         }
@@ -83,8 +101,9 @@ public class Parser {
             return negation;
         }
 
-        return primary();
-    }
+        if (disallowPrimary) throw new ParseError();
+
+        return primary();    }
 
     private Computable getArguments(Token operator) {
         List<Computable> arguments = new ArrayList<>();
@@ -97,37 +116,33 @@ public class Parser {
 
         /* Token paren = */ consume(TokenType.RIGHT_PAREN);
 
-        switch (operator.lexeme) {
-            case "exp":
-                return new Exp(arguments.get(0));
-            case "cos":
-                return new Cos(arguments.get(0));
-            case "sin":
-                return new Sin(arguments.get(0));
-            case "log":
-                return new Log(arguments.get(0));
-            default:
-                throw new ParseError();
-        }
+        OperatorInitializer init = operators.get(operator.lexeme);
+        if (init != null && init.arity() == arguments.size()) return init.create(arguments);
+
+        throw new ParseError();
     }
 
     private Computable primary() {
         if (match(TokenType.NUMBER)) {
             Token number = previous();
+            disallowPrimary = true;
             return new Literal(number.value, number.lexeme);
         }
 
         if (match(TokenType.OPERATOR)) {
             Token operator = previous();
             if (match(TokenType.LEFT_PAREN)) {
-                return getArguments(operator);
+                Computable f = getArguments(operator);
+                disallowPrimary = true;
+                return f;
             }
         }
 
         if (match(TokenType.LEFT_PAREN)) {
-            Computable subexpression = addition();
+            Computable expression = addition();
             consume(TokenType.RIGHT_PAREN);
-            return new SubExpression(subexpression);
+            disallowPrimary = true;
+            return expression;
         }
 
         throw new ParseError();

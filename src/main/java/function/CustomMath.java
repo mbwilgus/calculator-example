@@ -52,4 +52,9 @@ public class CustomMath implements Formula {
 
         return x * p;
     }
+
+    @Override
+    public double tan(double x) throws UnimplementedException {
+        throw new UnimplementedException("tan(x) has not been implemented in CustomMath");
+    }
 }
