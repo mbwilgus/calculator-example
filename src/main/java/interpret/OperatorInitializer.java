@@ -2,7 +2,9 @@ package interpret;
 
 import function.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface OperatorInitializer {
     Computable create(List<Computable> operands);
@@ -70,6 +72,20 @@ public interface OperatorInitializer {
         @Override
         public int arity() {
             return 1;
+        }
+    }
+
+    class CustomInitializer implements OperatorInitializer {
+        public static Map<String, Computable> defines = new HashMap<>();
+
+        @Override
+        public Computable create(List<Computable> operands) {
+            return null;
+        }
+
+        @Override
+        public int arity() {
+            return 0;
         }
     }
 }

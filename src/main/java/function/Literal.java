@@ -1,6 +1,6 @@
 package function;
 
-import type.Either;
+import data.Either;
 
 public class Literal implements Computable {
     private final double value;

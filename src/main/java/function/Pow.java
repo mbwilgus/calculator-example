@@ -1,6 +1,6 @@
 package function;
 
-import type.Either;
+import data.Either;
 
 import java.util.function.Function;
 

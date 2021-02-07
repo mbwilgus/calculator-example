@@ -1,6 +1,6 @@
 package function;
 
-import type.Either;
+import data.Either;
 
 public class SubExpression implements Computable{
     private final Computable expr;

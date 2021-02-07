@@ -1,7 +1,8 @@
 package function;
 
-import type.Either;
-import type.Left;
+import data.Either;
+import data.Left;
+import typeclass.Monad;
 
 import java.util.function.Function;
 
@@ -22,7 +23,7 @@ public class Div implements Computable {
                     return new Left<>("division by zero @ " + rhs.reconstruct());
                 }
 
-                return Either.unit(Computable.roundIf(x / y, 1E-10));
+                return Monad.unit(Computable.roundIf(x / y, 1E-10));
             };
 
             return rhs.evaluate(formula).bind(div);
