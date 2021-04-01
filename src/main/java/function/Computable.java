@@ -1,8 +1,8 @@
 package function;
 
-import type.Either;
-import type.Left;
-import type.Right;
+import data.either.Either;
+import data.either.Left;
+import data.either.Right;
 
 public interface Computable {
     Either<String, Double> evaluate(Formula formula);
